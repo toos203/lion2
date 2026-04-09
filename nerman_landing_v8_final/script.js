@@ -375,27 +375,31 @@
       const formData = new FormData(surveyForm);
       const action = surveyForm.getAttribute('action');
 
-      // Auto-fill order form to save user time
-      const surveyName = formData.get('name');
-      const surveyPhone = formData.get('phone_zalo');
-      
-      if (surveyName) {
-        const orderName = document.getElementById('form-name');
-        if (orderName) orderName.value = surveyName;
+      // Compile multi-select checkboxes into single comma-separated strings
+      const painPoints = formData.getAll('pain_points');
+      const prefs = formData.getAll('preferences');
+
+      const urlParams = new URLSearchParams();
+      // append basic fields
+      for (const [key, value] of formData.entries()) {
+        if (key !== 'pain_points' && key !== 'preferences') {
+          urlParams.append(key, value);
+        }
       }
-      if (surveyPhone) {
-        const orderPhone = document.getElementById('form-phone');
-        if (orderPhone) orderPhone.value = surveyPhone;
-      }
+      urlParams.append('pain_points', painPoints.join(', '));
+      urlParams.append('preferences', prefs.join(', '));
+      urlParams.append('time', new Date().toLocaleString('vi-VN'));
 
       fetch(action, {
         method: 'POST',
-        mode: 'no-cors',
+        mode: 'no-cors', // standard for Google Scripts
         cache: 'no-cache',
-        body: formData
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: urlParams.toString()
       })
       .then(() => {
-        // Với Google Apps Script no-cors, phản hồi trả về là opaque nên luôn chạy vào đây khi gửi thành công HTTP
         surveyForm.style.display = 'none';
         if (success) {
           success.style.display = 'block';
@@ -404,7 +408,7 @@
       })
       .catch(error => {
         console.error('Survey error:', error);
-        // Fallback for network issues
+        // Fallback for network issues / CORS opacity
         surveyForm.style.display = 'none';
         if (success) {
           success.style.display = 'block';
