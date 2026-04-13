@@ -400,10 +400,18 @@
         body: urlParams.toString()
       })
       .then(() => {
-        surveyForm.style.display = 'none';
-        if (success) {
-          success.style.display = 'block';
-          success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const actionVal = formData.get('action') || '';
+        if (actionVal.includes('Chốt đơn ngay')) {
+          const phoneVal = formData.get('phone_zalo') || '';
+          const nameVal = formData.get('name') || '';
+          const prefVal = formData.get('preferences') || '';
+          window.location.href = `/thanh-toan?phone=${encodeURIComponent(phoneVal)}&name=${encodeURIComponent(nameVal)}&pref=${encodeURIComponent(prefVal)}`;
+        } else {
+          surveyForm.style.display = 'none';
+          if (success) {
+            success.style.display = 'block';
+            success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
         }
       })
       .catch(error => {

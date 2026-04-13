@@ -379,10 +379,18 @@
             </button>
           </form>
 
-          <div class="survey-success" id="survey-success" style="display:none">
-            <div class="success-icon">✦</div>
-            <h3>Đăng Ký Thành Công!</h3>
-            <p>Nerman đã ghi nhận mong muốn của anh. Đội ngũ CSKH sẽ liên hệ với anh qua Zalo trong thời gian sớm nhất.</p>
+          <div class="survey-success" id="survey-success" style="display:none; text-align: center;">
+            <div class="success-icon" style="margin: 0 auto 16px;">✦</div>
+            <h3 style="margin-bottom: 12px;">Đăng Ký Thành Công!</h3>
+            <p style="margin-bottom: 24px;">Nerman đã ghi nhận đơn hàng của anh. Để ưu tiên xử lý gửi hàng nhanh nhất, anh có thể quét mã QR dưới đây để thanh toán.</p>
+            <div class="qr-container" style="background: white; padding: 16px; border-radius: 12px; display: inline-block; margin-bottom: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+              <img id="sepay-qr" src="" alt="Mã QR Thanh Toán SePay" style="width: 250px; max-width: 100%; border-radius: 8px;" />
+            </div>
+            <p style="font-size: 0.95rem; color: var(--text-dim); line-height: 1.6;">
+              Ngân hàng: <strong>TPBank</strong><br>
+              STK: <strong>78170420219</strong><br>
+              Nội dung CK: <strong id="qr-desc-text" style="color: var(--gold);"></strong>
+            </p>
           </div>
         </div>
 

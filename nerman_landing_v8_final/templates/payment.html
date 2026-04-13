@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thanh Toán Nerman Lion Bartender</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    body {
+      background: var(--dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--white);
+    }
+    .payment-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      width: 100%;
+      margin: 20px;
+    }
+    .payment-qr {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      display: inline-block;
+      margin: 24px 0;
+    }
+    .payment-qr img {
+      width: 250px;
+      max-width: 100%;
+      border-radius: 8px;
+    }
+    .bank-info {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: var(--text-dim);
+      margin-bottom: 24px;
+    }
+    .bank-info strong {
+      color: var(--gold);
+    }
+    .success-icon {
+      font-size: 3rem;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+    .input-field {
+      width: 100%; padding: 12px; margin-bottom: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white; display: block; box-sizing: border-box; font-family: var(--ff-sans);
+    }
+    .input-field[readonly] {
+      background: rgba(0,0,0,0.5);
+      color: #999;
+    }
+    .payment-form { text-align: left; }
+    .payment-form label { display: block; font-size: 0.9rem; margin-bottom: 6px; color: var(--gold); }
+  </style>
+</head>
+<body>
+
+  <div class="payment-card">
+    <div class="success-icon">✦</div>
+    <h2 style="font-family: var(--ff-serif); margin-bottom: 12px; color: var(--gold);">Thông Tin Đặt Hàng</h2>
+    
+    <div id="checkout-form-container">
+      <p>Cảm ơn anh đã quan tâm. Nerman cần thêm chút thông tin giao hàng.</p>
+      <div id="suggestion-box" style="display:none; color: var(--gold); border: 1px dashed var(--gold); padding: 14px; margin: 20px 0; border-radius: 8px; background: rgba(255, 215, 0, 0.05); text-align: left; line-height: 1.5; font-style: italic;"></div>
+      
+      <form id="checkoutForm" class="payment-form">
+        <label>Họ và Tên</label>
+        <input type="text" id="chk-name" class="input-field" readonly>
+        <label>Số điện thoại</label>
+        <input type="text" id="chk-phone" class="input-field" readonly>
+        <label>Địa chỉ giao hàng nhận ưu đãi</label>
+        <input type="text" id="chk-address" class="input-field" placeholder="Số nhà, đường, phường, quận, tỉnh/TP..." required>
+        <label>Sản phẩm mua</label>
+        <select id="chk-product" class="input-field" required></select>
+        <div style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <label>Số lượng</label>
+            <input type="number" id="chk-quantity" class="input-field" value="1" min="1" required>
+          </div>
+        </div>
+        <button type="submit" class="btn-secondary" style="width: 100%; justify-content: center; margin-top: 10px;">Xác Nhận Đặt Hàng</button>
+      </form>
+    </div>
+
+    <!-- Hidden initially -->
+    <div id="qr-container" style="display: none;">
+      <p>Để ưu tiên xử lý gửi hàng nhanh nhất, anh hãy quét mã QR qua App Ngân Hàng để hoàn tất đơn hàng:</p>
+      
+      <div id="qr-box" class="payment-qr">
+        <img id="qr-img" src="" alt="Đang tạo mã QR..." />
+      </div>
+
+      <div id="bank-info-box" class="bank-info">
+        Ngân hàng: <strong>TPBank</strong><br/>
+        Số tài khoản: <strong>78170420219</strong><br/>
+        Số tiền cần chuyển: <strong id="qr-amount"></strong><br/>
+        Nội dung bắt buộc: <strong id="qr-desc"></strong>
+      </div>
+
+      <div id="success-box" style="display: none; padding: 20px 0;">
+        <h3 style="color: #4CAF50; margin-bottom: 12px; font-family: var(--ff-serif);">🎊 Ting Ting! Thanh Toán Thành Công 🎊</h3>
+        <p>Hệ thống đã nhận được tiền. Đơn hàng của bạn sẽ sớm được trao cho đơn vị vận chuyển!</p>
+      </div>
+
+      <a href="/" class="btn-secondary" style="width: 100%; justify-content: center;">← Trở về Trang chủ</a>
+    </div>
+
+  </div>
+
+  <script>
+    window.onload = async function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const phone = urlParams.get('phone') || '';
+      const name = urlParams.get('name') || '';
+      const pref = urlParams.get('pref') || '';
+      
+      document.getElementById('chk-phone').value = phone;
+      document.getElementById('chk-name').value = name;
+
+      // Logic Map Preferences
+      let suggestionText = '';
+      let suggestedKeyword = '';
+      if (pref.includes('Mạnh mẽ, quyền lực')) {
+        suggestionText = '💡 Dựa trên sở thích của anh, em đề xuất anh chọn Party Up để tự tin nhất trong công việc!';
+        suggestedKeyword = 'Party Up';
+      } else if (pref.includes('Lịch lãm, tinh tế')) {
+        suggestionText = '💡 Dựa trên phong cách lịch lãm của anh, em đề xuất anh chọn Chill Time để luôn thu hút!';
+        suggestedKeyword = 'Chill Time';
+      } else if (pref.includes('Tươi mát, năng động')) {
+        suggestionText = '💡 Dựa trên sự năng động của anh, em đề xuất anh chọn Drunk Time để luôn bung xõa hết mình!';
+        suggestedKeyword = 'Drunk Time';
+      }
+      
+      if (suggestionText) {
+        const suggBox = document.getElementById('suggestion-box');
+        suggBox.textContent = suggestionText;
+        suggBox.style.display = 'block';
+      }
+
+      // Call API load products to dropdown
+      try {
+        let res = await fetch('/api/products');
+        let products = await res.json();
+        const sel = document.getElementById('chk-product');
+        let htmlP = '';
+        products.forEach(p => {
+            // Auto Select product if it matches suggested keyword
+            let selected = (suggestedKeyword && p.name.includes(suggestedKeyword)) ? 'selected' : '';
+            htmlP += `<option value="${p.id}" ${selected}>${p.name} - ${Number(p.price).toLocaleString()}đ</option>`;
+        });
+        sel.innerHTML = htmlP;
+      } catch(e) { console.error('Lỗi lấy sp:', e) }
+    };
+
+    let checkInterval;
+    let currentOrderId = null;
+
+    async function checkPaymentStatus() {
+      if(!currentOrderId) return;
+      try {
+        let res = await fetch(`/api/check-payment/${currentOrderId}`);
+        let data = await res.json();
+        if(data.paid) {
+          clearInterval(checkInterval);
+          document.getElementById('qr-box').style.display = 'none';
+          document.getElementById('bank-info-box').style.display = 'none';
+          document.getElementById('success-box').style.display = 'block';
+        }
+      } catch(e) {}
+    }
+
+    document.getElementById('checkoutForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.querySelector('#checkoutForm button');
+      btn.textContent = 'Đang xử lý...';
+      
+      const payload = {
+        name: document.getElementById('chk-name').value,
+        phone: document.getElementById('chk-phone').value,
+        address: document.getElementById('chk-address').value,
+        product_id: parseInt(document.getElementById('chk-product').value),
+        quantity: parseInt(document.getElementById('chk-quantity').value)
+      };
+
+      try {
+        let res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        let data = await res.json();
+        
+        if(data.success) {
+           document.getElementById('checkout-form-container').style.display = 'none';
+           document.querySelector('h2').textContent = 'Đơn Hàng Ghi Nhận!';
+           
+           // Generate QR
+           const orderId = data.order_id;
+           const amount = data.amount;
+           const desText = `MUA NERMAN DH${orderId}`;
+           const qrUrl = `https://qr.sepay.vn/img?acc=78170420219&bank=TPBank&amount=${amount}&des=${encodeURIComponent(desText)}`;
+           
+           document.getElementById('qr-img').src = qrUrl;
+           document.getElementById('qr-desc').textContent = desText;
+           document.getElementById('qr-amount').textContent = Number(amount).toLocaleString() + 'đ';
+           
+           document.getElementById('qr-container').style.display = 'block';
+           
+           currentOrderId = orderId;
+           checkInterval = setInterval(checkPaymentStatus, 5000);
+        }
+      } catch(e) {
+        alert('Có lỗi kết nối. Vui lòng thử lại!');
+        btn.textContent = 'Xác Nhận Đặt Hàng';
+      }
+    };
+  </script>
+</body>
+</html>
