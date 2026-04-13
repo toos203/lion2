@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div id="test"></div>
+<script>
+  function testClick() {
+    console.log("Clicked!");
+  }
+  document.getElementById('test').innerHTML = `<button onclick="testClick()">Click Me</button>`;
+</script>
+</body>
+</html>

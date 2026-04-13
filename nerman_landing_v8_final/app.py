@@ -47,6 +47,16 @@ def delete_product(id):
     conn.close()
     return jsonify({'success': True})
 
+@app.route('/api/products/<int:id>', methods=['PUT'])
+def update_product(id):
+    data = request.json
+    conn = get_db_connection()
+    conn.execute('UPDATE products SET name = ?, price = ?, description = ?, stock = ? WHERE id = ?',
+                 (data['name'], data['price'], data['description'], data['stock'], id))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
 # ================= CUSTOMERS API =================
 @app.route('/api/customers', methods=['GET'])
 def get_customers():
@@ -74,6 +84,16 @@ def add_customer():
 def delete_customer(id):
     conn = get_db_connection()
     conn.execute('DELETE FROM customers WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+@app.route('/api/customers/<int:id>', methods=['PUT'])
+def update_customer(id):
+    data = request.json
+    conn = get_db_connection()
+    conn.execute('UPDATE customers SET name = ?, phone = ?, zalo = ? WHERE id = ?',
+                 (data['name'], data['phone'], data['zalo'], id))
     conn.commit()
     conn.close()
     return jsonify({'success': True})
@@ -134,9 +154,8 @@ def checkout():
     conn.commit()
     conn.close()
     
-    return jsonify({'success': True, 'order_id': order_id, 'amount': amount}), 201
-
-SEPAY_TOKEN = "XIXZODOUHRDU7ML7JN5TA9EXOSQUI1AWCS86YP2UPCBP3NDZK8LL4G52ZNQLAOJV"
+import os
+SEPAY_TOKEN = os.environ.get("SEPAY_API_KEY", "XIXZODOUHRDU7ML7JN5TA9EXOSQUI1AWCS86YP2UPCBP3NDZK8LL4G52ZNQLAOJV")
 
 @app.route('/api/check-payment/<int:order_id>', methods=['GET'])
 def check_payment(order_id):
@@ -207,6 +226,24 @@ def add_order():
 def delete_order(id):
     conn = get_db_connection()
     conn.execute('DELETE FROM orders WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+@app.route('/api/orders/<int:id>', methods=['PUT'])
+def update_order(id):
+    data = request.json
+    conn = get_db_connection()
+    conn.execute('UPDATE orders SET status = ?, quantity = ?, address = ? WHERE id = ?',
+                 (data['status'], data['quantity'], data['address'], id))
+    
+    product_id_row = conn.execute('SELECT product_id FROM orders WHERE id = ?', (id,)).fetchone()
+    if product_id_row:
+        p_row = conn.execute('SELECT price FROM products WHERE id = ?', (product_id_row['product_id'],)).fetchone()
+        if p_row:
+            new_amount = float(p_row['price']) * int(data['quantity'])
+            conn.execute('UPDATE orders SET amount = ? WHERE id = ?', (new_amount, id))
+
     conn.commit()
     conn.close()
     return jsonify({'success': True})

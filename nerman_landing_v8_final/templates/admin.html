@@ -77,7 +77,7 @@
   </div>
 </div>
 
-<!-- Modal Thêm Sản Phẩm -->
+<!-- ================= MODALS THÊM ================= -->
 <div class="modal fade" id="addProductModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -98,7 +98,6 @@
   </div>
 </div>
 
-<!-- Modal Thêm Khách Hàng -->
 <div class="modal fade" id="addCustomerModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -118,12 +117,11 @@
   </div>
 </div>
 
-<!-- Modal Thêm Đơn Hàng -->
 <div class="modal fade" id="addOrderModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Tạo Đơn Hàng (Tự trừ tồn kho)</h5>
+        <h5 class="modal-title">Tạo Đơn Hàng</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
@@ -152,43 +150,202 @@
   </div>
 </div>
 
+<!-- ================= MODALS SỬA ================= -->
+<div class="modal fade" id="editProductModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Sửa Sản Phẩm</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formEditProduct">
+          <input type="hidden" id="ep-id">
+          <div class="mb-3"><label>Tên sản phẩm</label><input type="text" class="form-control" id="ep-name" required></div>
+          <div class="mb-3"><label>Giá</label><input type="number" class="form-control" id="ep-price" required></div>
+          <div class="mb-3"><label>Mô tả</label><input type="text" class="form-control" id="ep-desc"></div>
+          <div class="mb-3"><label>Số lượng tồn</label><input type="number" class="form-control" id="ep-stock" required></div>
+          <button type="submit" class="btn btn-warning w-100">Cập nhật</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editCustomerModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Sửa Khách Hàng</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formEditCustomer">
+          <input type="hidden" id="ec-id">
+          <div class="mb-3"><label>Tên</label><input type="text" class="form-control" id="ec-name" required></div>
+          <div class="mb-3"><label>Điện thoại</label><input type="text" class="form-control" id="ec-phone" required></div>
+          <div class="mb-3"><label>Zalo</label><input type="text" class="form-control" id="ec-zalo"></div>
+          <button type="submit" class="btn btn-warning w-100">Cập nhật</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editOrderModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Sửa Đơn Hàng</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formEditOrder">
+          <input type="hidden" id="eo-id">
+          <div class="mb-3"><label>Số Lượng</label><input type="number" class="form-control" id="eo-quant" required></div>
+          <div class="mb-3"><label>Địa Chỉ</label><input type="text" class="form-control" id="eo-addr"></div>
+          <div class="mb-3">
+            <label>Trạng Thái</label>
+            <select class="form-select" id="eo-status">
+              <option value="Chờ thanh toán">Chờ thanh toán</option>
+              <option value="Đang xử lý">Đang xử lý</option>
+              <option value="Hoàn thành">Hoàn thành</option>
+              <option value="Đã hủy">Đã hủy</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-warning w-100">Cập nhật</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Bootstrap Bundle JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
   let cachedProducts = [];
+  let cachedOrders = [];
+  let cachedCustomers = [];
+
+  let editProductModal = new bootstrap.Modal(document.getElementById('editProductModal'));
+  let editCustomerModal = new bootstrap.Modal(document.getElementById('editCustomerModal'));
+  let editOrderModal = new bootstrap.Modal(document.getElementById('editOrderModal'));
 
   async function loadData() {
-    // Load Products
     try {
+      // Products
       let res = await fetch('/api/products');
-      let products = await res.json();
-      cachedProducts = products;
-      let htmlP = products.map(p => `<tr><td>${p.id}</td><td>${p.name}</td><td>${Number(p.price).toLocaleString()}đ</td><td>${p.description}</td><td><span class="badge bg-${p.stock > 0 ? 'primary':'danger'}">${p.stock}</span></td><td><button class="btn btn-sm btn-danger" onclick="deleteData('products', ${p.id})">Xóa</button></td></tr>`).join('');
+      cachedProducts = await res.json();
+      let htmlP = cachedProducts.map(p => `<tr><td>${p.id}</td><td>${p.name}</td><td>${Number(p.price).toLocaleString()}đ</td><td>${p.description}</td><td><span class="badge bg-${p.stock > 0 ? 'primary':'danger'}">${p.stock}</span></td>
+      <td>
+        <button class="btn btn-sm btn-warning me-1" onclick="console.log('Edit SP'); window.openEditProduct(${p.id})">Sửa</button>
+        <button class="btn btn-sm btn-danger" onclick="console.log('Delete SP'); window.deleteData('products', ${p.id})">Xóa</button>
+      </td></tr>`).join('');
       document.getElementById('products-tbody').innerHTML = htmlP;
 
-      // Load Customers
+      // Customers
       res = await fetch('/api/customers');
-      let cust = await res.json();
-      let htmlC = cust.map(c => `<tr><td>${c.id}</td><td>${c.name}</td><td>${c.phone}</td><td>${c.zalo || ''}</td><td>${c.reg_date}</td><td><button class="btn btn-sm btn-danger" onclick="deleteData('customers', ${c.id})">Xóa</button></td></tr>`).join('');
+      cachedCustomers = await res.json();
+      let htmlC = cachedCustomers.map(c => `<tr><td>${c.id}</td><td>${c.name}</td><td>${c.phone}</td><td>${c.zalo || ''}</td><td>${c.reg_date}</td>
+      <td>
+        <button class="btn btn-sm btn-warning me-1" onclick="window.openEditCustomer(${c.id})">Sửa</button>
+        <button class="btn btn-sm btn-danger" onclick="window.deleteData('customers', ${c.id})">Xóa</button>
+      </td></tr>`).join('');
       document.getElementById('customers-tbody').innerHTML = htmlC;
 
-      // Load Orders
+      // Orders
       res = await fetch('/api/orders');
-      let ord = await res.json();
-      let htmlO = ord.map(o => `<tr><td>${o.id}</td><td>${o.customer_name}</td><td>${o.product_name}</td><td>${o.quantity || 1}</td><td>${o.address || ''}</td><td>${Number(o.amount).toLocaleString()}đ</td><td><span class="badge bg-info">${o.status}</span></td><td>${o.order_date}</td><td><button class="btn btn-sm btn-danger" onclick="deleteData('orders', ${o.id})">Xóa</button></td></tr>`).join('');
+      cachedOrders = await res.json();
+      let htmlO = cachedOrders.map(o => `<tr><td>${o.id}</td><td>${o.customer_name}</td><td>${o.product_name}</td><td>${o.quantity || 1}</td><td>${o.address || ''}</td><td>${Number(o.amount).toLocaleString()}đ</td><td><span class="badge bg-info">${o.status}</span></td><td>${o.order_date}</td>
+      <td>
+        <button class="btn btn-sm btn-warning me-1" onclick="window.openEditOrder(${o.id})">Sửa</button>
+        <button class="btn btn-sm btn-danger" onclick="window.deleteData('orders', ${o.id})">Xóa</button>
+      </td></tr>`).join('');
       document.getElementById('orders-tbody').innerHTML = htmlO;
     } catch (e) {
       console.log(e);
     }
   }
 
+  // --- Mở Modal Sửa ---
+  window.openEditProduct = function(id) {
+    let p = cachedProducts.find(x => x.id === id);
+    if(!p) return;
+    document.getElementById('ep-id').value = p.id;
+    document.getElementById('ep-name').value = p.name;
+    document.getElementById('ep-price').value = p.price;
+    document.getElementById('ep-desc').value = p.description;
+    document.getElementById('ep-stock').value = p.stock;
+    editProductModal.show();
+  };
+
+  window.openEditCustomer = function(id) {
+    let c = cachedCustomers.find(x => x.id === id);
+    if(!c) return;
+    document.getElementById('ec-id').value = c.id;
+    document.getElementById('ec-name').value = c.name;
+    document.getElementById('ec-phone').value = c.phone;
+    document.getElementById('ec-zalo').value = c.zalo || '';
+    editCustomerModal.show();
+  };
+
+  window.openEditOrder = function(id) {
+    let o = cachedOrders.find(x => x.id === id);
+    if(!o) return;
+    document.getElementById('eo-id').value = o.id;
+    document.getElementById('eo-quant').value = o.quantity || 1;
+    document.getElementById('eo-addr').value = o.address || '';
+    document.getElementById('eo-status').value = o.status;
+    editOrderModal.show();
+  };
+
+  // --- Submit Sửa ---
+  document.getElementById('formEditProduct').onsubmit = async (e) => {
+    e.preventDefault();
+    let id = document.getElementById('ep-id').value;
+    let payload = {
+      name: document.getElementById('ep-name').value,
+      price: parseFloat(document.getElementById('ep-price').value),
+      description: document.getElementById('ep-desc').value,
+      stock: parseInt(document.getElementById('ep-stock').value)
+    };
+    await fetch(`/api/products/${id}`, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+    editProductModal.hide();
+    loadData();
+  };
+
+  document.getElementById('formEditCustomer').onsubmit = async (e) => {
+    e.preventDefault();
+    let id = document.getElementById('ec-id').value;
+    let payload = {
+      name: document.getElementById('ec-name').value,
+      phone: document.getElementById('ec-phone').value,
+      zalo: document.getElementById('ec-zalo').value
+    };
+    await fetch(`/api/customers/${id}`, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+    editCustomerModal.hide();
+    loadData();
+  };
+
+  document.getElementById('formEditOrder').onsubmit = async (e) => {
+    e.preventDefault();
+    let id = document.getElementById('eo-id').value;
+    let payload = {
+      quantity: parseInt(document.getElementById('eo-quant').value),
+      address: document.getElementById('eo-addr').value,
+      status: document.getElementById('eo-status').value
+    };
+    await fetch(`/api/orders/${id}`, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+    editOrderModal.hide();
+    loadData();
+  };
+
+
+  // --- Helper khác ---
   async function loadOrderOptions() {
     try {
-      let custRes = await fetch('/api/customers');
-      let cust = await custRes.json();
-      document.getElementById('o-customer').innerHTML = cust.map(c => `<option value="${c.id}">${c.name} - ${c.phone}</option>`).join('');
-      
+      document.getElementById('o-customer').innerHTML = cachedCustomers.map(c => `<option value="${c.id}">${c.name} - ${c.phone}</option>`).join('');
       document.getElementById('o-product').innerHTML = cachedProducts.map(p => `<option value="${p.id}" data-price="${p.price}">${p.name} (Kho: ${p.stock})</option>`).join('');
       updatePrice();
     } catch(e) {}
@@ -200,14 +357,14 @@
     document.getElementById('o-amount').value = price;
   }
 
-  async function deleteData(table, id) {
+  window.deleteData = async function(table, id) {
     if(confirm('Bạn có chắc chắn muốn xóa?')) {
       await fetch(`/api/${table}/${id}`, {method: 'DELETE'});
       loadData();
     }
-  }
+  };
 
-  // --- Forms ---
+  // --- Forms Add ---
   document.getElementById('formAddProduct').onsubmit = async (e) => {
     e.preventDefault();
     let payload = {
@@ -247,7 +404,7 @@
     await fetch('/api/orders', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
     bootstrap.Modal.getInstance(document.getElementById('addOrderModal')).hide();
     e.target.reset();
-    loadData(); // This will reload products and orders, automatically updating the stock in the UI!
+    loadData(); 
   };
 
   window.onload = loadData;
