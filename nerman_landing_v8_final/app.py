@@ -154,6 +154,8 @@ def checkout():
     conn.commit()
     conn.close()
     
+    return jsonify({'success': True, 'order_id': order_id, 'amount': amount})
+
 import os
 SEPAY_TOKEN = os.environ.get("SEPAY_API_KEY", "XIXZODOUHRDU7ML7JN5TA9EXOSQUI1AWCS86YP2UPCBP3NDZK8LL4G52ZNQLAOJV")
 
