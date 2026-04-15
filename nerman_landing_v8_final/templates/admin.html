@@ -56,7 +56,7 @@
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCustomerModal">+ Thêm KH</button>
       </div>
       <table class="table table-hover">
-        <thead class="table-light"><tr><th>ID</th><th>Tên</th><th>SĐT</th><th>Zalo</th><th>Ngày ĐK</th><th>Hành động</th></tr></thead>
+        <thead class="table-light"><tr><th>ID</th><th>Tên</th><th>SĐT</th><th>Zalo</th><th>Email</th><th>Ngày ĐK</th><th>Hành động</th></tr></thead>
         <tbody id="customers-tbody"></tbody>
       </table>
     </div>
@@ -110,6 +110,7 @@
           <div class="mb-3"><label>Tên</label><input type="text" class="form-control" id="c-name" required></div>
           <div class="mb-3"><label>Điện thoại</label><input type="text" class="form-control" id="c-phone" required></div>
           <div class="mb-3"><label>Zalo</label><input type="text" class="form-control" id="c-zalo"></div>
+          <div class="mb-3"><label>Email</label><input type="email" class="form-control" id="c-email" placeholder="email@example.com"></div>
           <button type="submit" class="btn btn-success w-100">Lưu</button>
         </form>
       </div>
@@ -185,6 +186,7 @@
           <div class="mb-3"><label>Tên</label><input type="text" class="form-control" id="ec-name" required></div>
           <div class="mb-3"><label>Điện thoại</label><input type="text" class="form-control" id="ec-phone" required></div>
           <div class="mb-3"><label>Zalo</label><input type="text" class="form-control" id="ec-zalo"></div>
+          <div class="mb-3"><label>Email</label><input type="email" class="form-control" id="ec-email" placeholder="email@example.com"></div>
           <button type="submit" class="btn btn-warning w-100">Cập nhật</button>
         </form>
       </div>
@@ -247,7 +249,7 @@
       // Customers
       res = await fetch('/api/customers');
       cachedCustomers = await res.json();
-      let htmlC = cachedCustomers.map(c => `<tr><td>${c.id}</td><td>${c.name}</td><td>${c.phone}</td><td>${c.zalo || ''}</td><td>${c.reg_date}</td>
+      let htmlC = cachedCustomers.map(c => `<tr><td>${c.id}</td><td>${c.name}</td><td>${c.phone}</td><td>${c.zalo || ''}</td><td>${c.email || ''}</td><td>${c.reg_date}</td>
       <td>
         <button class="btn btn-sm btn-warning me-1" onclick="window.openEditCustomer(${c.id})">Sửa</button>
         <button class="btn btn-sm btn-danger" onclick="window.deleteData('customers', ${c.id})">Xóa</button>
@@ -287,6 +289,7 @@
     document.getElementById('ec-name').value = c.name;
     document.getElementById('ec-phone').value = c.phone;
     document.getElementById('ec-zalo').value = c.zalo || '';
+    document.getElementById('ec-email').value = c.email || '';
     editCustomerModal.show();
   };
 
@@ -321,7 +324,8 @@
     let payload = {
       name: document.getElementById('ec-name').value,
       phone: document.getElementById('ec-phone').value,
-      zalo: document.getElementById('ec-zalo').value
+      zalo: document.getElementById('ec-zalo').value,
+      email: document.getElementById('ec-email').value
     };
     await fetch(`/api/customers/${id}`, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
     editCustomerModal.hide();
@@ -384,7 +388,8 @@
     let payload = {
       name: document.getElementById('c-name').value,
       phone: document.getElementById('c-phone').value,
-      zalo: document.getElementById('c-zalo').value
+      zalo: document.getElementById('c-zalo').value,
+      email: document.getElementById('c-email').value
     };
     let res = await fetch('/api/customers', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
     if(!res.ok) alert('Thêm thất bại (SĐT có thể bị trùng)');

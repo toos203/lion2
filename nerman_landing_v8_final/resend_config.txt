@@ -1,0 +1,3 @@
+RESEND_API_KEY=re_8wChMvFX_KoNAiW6oSqC8kZNneBfVEP8S
+FROM_EMAIL=support@nerman.io.vn
+FROM_NAME=Nerman Lion Bartender

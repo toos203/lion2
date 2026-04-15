@@ -2121,7 +2121,8 @@ a { text-decoration: none; color: inherit; }
 }
 
 .survey-q-box input[type="text"],
-.survey-q-box input[type="tel"] {
+.survey-q-box input[type="tel"],
+.survey-q-box input[type="email"] {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(201,168,76,0.25);
   border-radius: 8px;
@@ -2130,6 +2131,15 @@ a { text-decoration: none; color: inherit; }
   font-size: 1rem;
   outline: none;
   transition: var(--transition);
+}
+
+/* Keep dark styling when browser autocompletes email/phone/name fields */
+.survey-q-box input[type="text"]:-webkit-autofill,
+.survey-q-box input[type="tel"]:-webkit-autofill,
+.survey-q-box input[type="email"]:-webkit-autofill {
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0px 1000px #1f1a14 inset;
+  transition: background-color 9999s ease-out 0s;
 }
 
 .survey-q-box input:focus {

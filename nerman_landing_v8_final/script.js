@@ -390,6 +390,18 @@
       urlParams.append('preferences', prefs.join(', '));
       urlParams.append('time', new Date().toLocaleString('vi-VN'));
 
+      // Lưu khách hàng vào brain.db (bao gồm email) qua API nội bộ
+      const nameVal = formData.get('name') || '';
+      const phoneVal = formData.get('phone_zalo') || '';
+      const emailVal = formData.get('email') || '';
+      if (nameVal && phoneVal) {
+        fetch('/api/customers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: nameVal, phone: phoneVal, email: emailVal, zalo: phoneVal })
+        }).catch(() => {}); // Silent fail – Google Sheet là backup
+      }
+
       fetch(action, {
         method: 'POST',
         mode: 'no-cors', // standard for Google Scripts
@@ -402,10 +414,10 @@
       .then(() => {
         const actionVal = formData.get('action') || '';
         if (actionVal.includes('Chốt đơn ngay')) {
-          const phoneVal = formData.get('phone_zalo') || '';
-          const nameVal = formData.get('name') || '';
+          const phoneVal2 = formData.get('phone_zalo') || '';
+          const nameVal2 = formData.get('name') || '';
           const prefVal = formData.get('preferences') || '';
-          window.location.href = `/thanh-toan?phone=${encodeURIComponent(phoneVal)}&name=${encodeURIComponent(nameVal)}&pref=${encodeURIComponent(prefVal)}`;
+          window.location.href = `/thanh-toan?phone=${encodeURIComponent(phoneVal2)}&name=${encodeURIComponent(nameVal2)}&pref=${encodeURIComponent(prefVal)}`;
         } else {
           surveyForm.style.display = 'none';
           if (success) {
@@ -426,4 +438,3 @@
     });
   }
 })();
-
